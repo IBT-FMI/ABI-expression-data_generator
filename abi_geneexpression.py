@@ -21,21 +21,30 @@ from nipype.interfaces.ants import ApplyTransforms
 API_SERVER = "http://api.brain-map.org/"
 API_DATA_PATH = API_SERVER + "api/v2/data/"
 
-#GLOBAL DEFAULT = None, so no timeout error. Try this??
+#set default timeout for urllib.request
 socket.setdefaulttimeout(100)
 
 def GetGeneNames(startRow=0,numRows=2000,totalRows=-1):
     """
     Queries the Allen Mouse Brain Institute website for all gene expression data available for download.
 
+    Parameters:
+    -----------
+    startRow: int
+      Starting row
+    numRows: int
+      Number of rows shown per query. Max is 2000.
+    totalRows: int
+      Number of total rows to query. If set to -1, all available rows will be displayed.
+
     Returns:
     --------
     info: defaultdict
-        key: genename, value: list of corresponding SectionDataSetID (SectionDataSet: see "http://help.brain-map.org/display/api/Data+Model")
+        key: genename, value: list of corresponding SectionDataSetID
+        (SectionDataSet: see "http://help.brain-map.org/display/api/Data+Model")
         ID needed to specify download target.
 
     """
-
     startRow = startRow
     numRows = numRows
     totalRows = totalRows
@@ -47,16 +56,16 @@ def GetGeneNames(startRow=0,numRows=2000,totalRows=-1):
     done = False
 
     while not done:
-        pagedUrl = API_DATA_PATH +"query.json?criteria=model::SectionDataSet,rma::criteria,[failed$eqfalse],products[abbreviation$eq'Mouse'],treatments[name$eq'ISH'],rma::include,genes,specimen(donor(age)),plane_of_section" + '&startRow=%d&numRows=%d' % (startRow,numRows)
+        pagedUrl = API_DATA_PATH +"query.json?criteria=model::SectionDataSet,rma::criteria,
+        [failed$eqfalse],products[abbreviation$eq'Mouse'],treatments[name$eq'ISH'],
+        rma::include,genes,specimen(donor(age)),plane_of_section" + '&startRow=%d&numRows=%d' % (startRow,numRows)
 
-        print(pagedUrl)
         source = urllib.request.urlopen(pagedUrl).read()
         response = json.loads(source)
         rows += response['msg']
         for x in response['msg']:
 
             if x['failed'] == False:
-            #if x['failed'] == False and x['expression'] == True :
                 info[x['genes'][0]['acronym']].append(x['id'])
 
         if totalRows < 0:
@@ -69,7 +78,18 @@ def GetGeneNames(startRow=0,numRows=2000,totalRows=-1):
 
     return info
 
-def download_all_ISH(info,name="ABI_geneexpression_data",version="9999"):
+def sub_name(s):
+   """replaces brackets with '_' and removes ',* """
+
+        #replace brackets with '_' and remove ',*
+        #s = re.sub('\W', '',s_n)  dont do that, will replace '-' as well
+        s_n = re.sub('[()]',"_",s)
+        s_n = re.sub("'","",s_n)
+        s_n = re.sub('\*',"",s_n)
+        return s_n
+
+#TODO:check no expression (-> ABI-mail)
+def download_all_ISH(info,folder_name="ABI_geneexpression_data-9999"):
     """
     Downloads all datasets corresponding to SectionDataSetID given, converts data format from mhd/raw to nii and transforms data to dsurqec template.
 
@@ -81,24 +101,18 @@ def download_all_ISH(info,name="ABI_geneexpression_data",version="9999"):
 
     """
     failed_downloads = list()
-    data_path = name + "-" + version
-    #TODO: script keeps hanging somewhere, maybe timeout for connection, or try catch block and saving exp files numbers for later downloads:
+    data_path = folder_name
+    #TODO: test timeout, and if timeout occurs, repeat attempt download
     if not os.path.exists(data_path): os.mkdir(data_path)
     download_url = "http://api.brain-map.org/grid_data/download/"
     for gene in info.items():
         gene_name = gene[0]
         gene_ids = gene[1]
-        #replace brackets with '_' and remove ',*
-        #TODO:put into sep. fcn to avoid doing it twice
-        gene_r = re.sub('[()]',"_",gene_name)
-        #gene_r = re.sub('\W', '',gene_r)  dont do that, will replace '-' as well
-        gene_r = re.sub("'","",gene_r)
-        gene_r = re.sub('\*',"",gene_r)
-        path_to_gene = os.path.join("/mnt/data/setinadata/abi_data/geneexpression/ABI_geneexpression_data-9999",gene_r)
-        #TODO: change logic, check if right file exists
+        gene_r = sub_name(gene_name)
+        path_to_gene = os.path.join(data_path,gene_r)
+        #TODO: change logic, check if right file exists (empty folder)
         if os.path.exists(path_to_gene):continue
         if not os.path.exists(path_to_gene) : os.mkdir(path_to_gene)
-        print(gene_r)
         for id in gene_ids:
             url = download_url + str(id)
             try:
@@ -112,10 +126,7 @@ def download_all_ISH(info,name="ABI_geneexpression_data",version="9999"):
             zf = zipfile.ZipFile(fh[0])
             filename = str.split((fh[1]._headers[6][1]),'filename=')[1]
             filename = str.split(filename,'.zip')[0]
-            #replace brackets with '_' and remove ',*
-            filename = re.sub('[()]',"_",filename)
-            filename = re.sub('\*', '',filename)
-            filename = re.sub("'","",filename)
+            filename = sub_name(filename)
             path_to_folder = os.path.join(path_to_gene,filename)
             zf.extractall(os.path.join(path_to_gene,filename))
             zf.close()
@@ -127,9 +138,12 @@ def download_all_ISH(info,name="ABI_geneexpression_data",version="9999"):
                     continue
 
             path_to_mhd = os.path.join(path_to_folder,"energy.mhd")
+            path_to_raw = os.path.join(path_to_folder,"energy.raw")
             path_to_nifti = convert_raw_to_nii(path_to_mhd,filename)
             apply_composite(path_to_nifti)
             os.remove(path_to_nifti)
+            os.remove(path_to_mhd)
+            os.remove(path_to_raw)
 
     if len(failed_downloads) > 0:
         print("failed: ")
@@ -178,12 +192,12 @@ def convert_raw_to_nii(input_file,output_file):
     name = output_file + '.nii.gz'
     output_path = os.path.join(os.path.dirname(input_file),name)
     nibabel.save(img,output_path)
-    
+
     return output_path
 
 def apply_composite(file):
     """
-    Uses ANTS ApplyTransforms to transform image to 
+    Uses ANTS ApplyTransforms to transform image to
 
     Parameters :
     ------------
@@ -204,26 +218,30 @@ def apply_composite(file):
 
     #TODO sform to qform
 
-def save_info(info):
-    f = open("ABI_genes_ids.csv","w")
-    for gene in info:
+#TODO: possibly info where no dataset is available
+
+def save_info(info,folder_name):
+   """saves the information about genename and correspoding SectionDataSetID as csv """
+   file_path=os.path.join(folder_name,"ABI_genes_datasetid.csv")
+   f = open(file_path,"w")
+   for gene in info:
         f.write('\n')
         f.write(gene)
         for id in info[gene]:
             f.write("," + str(id))
 
-def create_archive(name,version):
-   path = "ABI_geneexpression_data-9999"
-   tar_name = name + "-" + version + ".tar.xz"
+def create_archive(folder_name):
+   """creates .tar.xz archive """
+   tar_name = folder_name + ".tar.xz"
    with tarfile.open(tar_name, "w:xz") as tar_handle:
-      for root,dirs,files in os.walk(path):
+      for root,dirs,files in os.walk(folder_name):
          for file in files:
             print(file)
             tar_handle.add(os.path.join(root,file))
 
 
 def main():
-   parser = argparse.ArgumentParser(description="Similarity",formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+   parser = argparse.ArgumentParser(description="ABI_geneexpression",formatter_class=argparse.ArgumentDefaultsHelpFormatter)
    parser.add_argument('--package_name','-n',type=str,default="ABI_geneexpression_data")
    parser.add_argument('--package_version','-v',type=str,default="9999")
    parser.add_argument('--startRow','-s',type=int,default=0)
@@ -231,10 +249,11 @@ def main():
    parser.add_argument('--totalRows','-t',type=int,default=-1)
    args=parser.parse_args()
 
-   #info=GetGeneNames(startRow=args.startRow,numRows=args.numRows,totalRows=args.totalRows)
-   #download_all_ISH(info,name=args.package_name,version=args.package_version)
-   #save_info(info)
-   create_archive(args.package_name,args.package_version)
+   folder_name = args.package_name + "-" + args.package_version
+   info=GetGeneNames(startRow=args.startRow,numRows=args.numRows,totalRows=args.totalRows)
+   download_all_ISH(info,folder_name=folder_name)
+   save_info(info,folder_name)
+   create_archive(folder_name)
 
 if __name__ == "__main__":
     main()
