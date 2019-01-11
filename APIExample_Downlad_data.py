@@ -11,6 +11,7 @@ import numpy
 import nibabel
 import re
 import socket
+import tarfile
 from socket import timeout
 from collections import defaultdict
 from mhd_utils_3d import *
@@ -84,15 +85,16 @@ def download_all_ISH(info,name="ABI_geneexpression_data",version="9999"):
     #TODO: script keeps hanging somewhere, maybe timeout for connection, or try catch block and saving exp files numbers for later downloads:
     if not os.path.exists(data_path): os.mkdir(data_path)
     download_url = "http://api.brain-map.org/grid_data/download/"
-    for gene in info.items:
+    for gene in info.items():
         gene_name = gene[0]
         gene_ids = gene[1]
         #replace brackets with '_' and remove ',*
+        #TODO:put into sep. fcn to avoid doing it twice
         gene_r = re.sub('[()]',"_",gene_name)
         #gene_r = re.sub('\W', '',gene_r)  dont do that, will replace '-' as well
         gene_r = re.sub("'","",gene_r)
         gene_r = re.sub('\*',"",gene_r)
-        path_to_gene = os.path.join("/mnt/data/setinadata/abi_data/geneexpression/ABI_geneexpression_data",gene_r)
+        path_to_gene = os.path.join("/mnt/data/setinadata/abi_data/geneexpression/ABI_geneexpression_data-9999",gene_r)
         #TODO: change logic, check if right file exists
         if os.path.exists(path_to_gene):continue
         if not os.path.exists(path_to_gene) : os.mkdir(path_to_gene)
@@ -210,19 +212,29 @@ def save_info(info):
         for id in info[gene]:
             f.write("," + str(id))
 
+def create_archive(name,version):
+   path = "ABI_geneexpression_data-9999"
+   tar_name = name + "-" + version + ".tar.xz"
+   with tarfile.open(tar_name, "w:xz") as tar_handle:
+      for root,dirs,files in os.walk(path):
+         for file in files:
+            print(file)
+            tar_handle.add(os.path.join(root,file))
 
 
 def main():
    parser = argparse.ArgumentParser(description="Similarity",formatter_class=argparse.ArgumentDefaultsHelpFormatter)
    parser.add_argument('--package_name','-n',type=str,default="ABI_geneexpression_data")
-   parser.add_argument('--package_version','-v',type=str,default="")
+   parser.add_argument('--package_version','-v',type=str,default="9999")
    parser.add_argument('--startRow','-s',type=int,default=0)
    parser.add_argument('--numRows','-r',type=int,default=2000)
-   parser.add_argument('totalRows','-t',type=int,default=-1)
+   parser.add_argument('--totalRows','-t',type=int,default=-1)
+   args=parser.parse_args()
 
-   info=GetGeneNames(startRow=args.startRow,numRows=args.numRows,totalRows=args.totalRows)
-   download_all_ISH(info,name=args.package_name,version=args.package_version)
-   save_info(info)
+   #info=GetGeneNames(startRow=args.startRow,numRows=args.numRows,totalRows=args.totalRows)
+   #download_all_ISH(info,name=args.package_name,version=args.package_version)
+   #save_info(info)
+   create_archive(args.package_name,args.package_version)
 
 if __name__ == "__main__":
     main()
