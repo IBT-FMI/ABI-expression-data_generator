@@ -1,11 +1,11 @@
 
-#ABI geneexpression data
+# ABI geneexpression data
 
 Script to download geneexpression data from the Allen Mouse Brain data portal [ABI](http://mouse.brain-map.org/). Script will query the database, download available data, convert form raw/mhd format to NIfTI
 and registers data to dsurqec??
 
 
-#Citation Notice
+# Citation Notice
 
 Citation guidelines for use of the Allen mouse brain atlas can be found at: https://alleninstitute.org/legal/citation-policy/
 
@@ -15,7 +15,7 @@ Source:http://mouse.brain-map.org/
 (slightly adapted to be compatible with newer python versions)
 
 
-#Usage
+# Usage
 
 In order to create a new version of the ABI_geneexpression data package, simply navigate to the root directory of this repository and run:
 
