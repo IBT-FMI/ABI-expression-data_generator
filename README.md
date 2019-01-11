@@ -11,7 +11,7 @@ Citation guidelines for use of the Allen mouse brain atlas can be found at: http
 
 Script mhd_utils_3d.py:  
 Author: bjian,Price Jackson  
-Source:  
+Source: https://sites.google.com/site/pjmedphys/scripts   
 (slightly adapted to be compatible with newer python versions)
 
 
