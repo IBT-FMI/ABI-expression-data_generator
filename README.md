@@ -2,7 +2,7 @@
 # ABI geneexpression data
 
 Script to download geneexpression data from the Allen Mouse Brain data portal [ABI](http://mouse.brain-map.org/). Script will query the database, download available data, convert form raw/mhd format to NIfTI
-and registers data to dsurqec??
+and registers data.
 
 
 # Citation Notice
