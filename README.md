@@ -9,9 +9,9 @@ and registers data to dsurqec??
 
 Citation guidelines for use of the Allen mouse brain atlas can be found at: https://alleninstitute.org/legal/citation-policy/
 
-Script mhd_utils_3d.py:
-Author: bjian,Price Jackson
-Source:http://mouse.brain-map.org/
+Script mhd_utils_3d.py:  
+Author: bjian,Price Jackson  
+Source:  
 (slightly adapted to be compatible with newer python versions)
 
 
