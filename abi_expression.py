@@ -89,7 +89,7 @@ def sub_name(s):
         return s_n
 
 #TODO:check no expression (-> ABI-mail)
-def download_all_ISH(info,folder_name="ABI_expression_data-9999"):
+def download_all_ISH(info,folder_name="ABI-expression-data-9999"):
     """
     Downloads all datasets corresponding to SectionDataSetID given, converts data format from mhd/raw to nii and transforms data to dsurqec template.
 
@@ -222,7 +222,7 @@ def apply_composite(file):
 
 def save_info(info,folder_name):
    """saves the information about genename and correspoding SectionDataSetID as csv """
-   file_path=os.path.join(folder_name,"ABI_genes_datasetid.csv")
+   file_path=os.path.join(folder_name,"ABI-genes-datasetid.csv")
    f = open(file_path,"w")
    for gene in info:
         f.write('\n')
@@ -241,8 +241,8 @@ def create_archive(folder_name):
 
 
 def main():
-   parser = argparse.ArgumentParser(description="ABI_expression",formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-   parser.add_argument('--package_name','-n',type=str,default="ABI_expression_data")
+   parser = argparse.ArgumentParser(description="ABI-expression",formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+   parser.add_argument('--package_name','-n',type=str,default="ABI-expression-data")
    parser.add_argument('--package_version','-v',type=str,default="9999")
    parser.add_argument('--startRow','-s',type=int,default=0)
    parser.add_argument('--numRows','-r',type=int,default=2000)
