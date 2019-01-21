@@ -58,7 +58,7 @@ def GetGeneNames(startRow=0,numRows=2000,totalRows=-1):
     while not done:
         pagedUrl = API_DATA_PATH +"query.json?criteria=model::SectionDataSet,rma::criteria,
         [failed$eqfalse],products[abbreviation$eq'Mouse'],treatments[name$eq'ISH'],
-        rma::include,genes,specimen(donor(age)),plane_of_section" + '&startRow=%d&numRows=%d' % (startRow,numRows)
+        rma::include,genes,specimen(donor(age)),plane_of_section" + '&startRow={0}&numRows={1}'.format(startRow,numRows)
 
         source = urllib.request.urlopen(pagedUrl).read()
         response = json.loads(source)
