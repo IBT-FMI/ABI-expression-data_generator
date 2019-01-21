@@ -9,10 +9,10 @@ and registers data.
 
 Citation guidelines for use of the Allen mouse brain atlas can be found at: https://alleninstitute.org/legal/citation-policy/
 
-Script mhd_utils_3d.py:  
+Script `mhd_utils_3d.py`:  
 Author: bjian,Price Jackson  
 Source: https://sites.google.com/site/pjmedphys/scripts   
-(slightly adapted to be compatible with newer python versions)
+(slightly adapted for compatibility with newer Python versions)
 
 
 # Usage
