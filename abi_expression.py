@@ -56,9 +56,7 @@ def GetGeneNames(startRow=0,numRows=2000,totalRows=-1):
     done = False
 
     while not done:
-        pagedUrl = API_DATA_PATH +"query.json?criteria=model::SectionDataSet,rma::criteria,
-        [failed$eqfalse],products[abbreviation$eq'Mouse'],treatments[name$eq'ISH'],
-        rma::include,genes,specimen(donor(age)),plane_of_section" + '&startRow={0}&numRows={1}'.format(startRow,numRows)
+        pagedUrl = API_DATA_PATH +"query.json?criteria=model::SectionDataSet,rma::criteria,[failed$eqfalse],products[abbreviation$eq'Mouse'],treatments[name$eq'ISH'],rma::include,genes,specimen(donor(age)),plane_of_section" + '&startRow={0}&numRows={1}'.format(startRow,numRows)
 
         source = urllib.request.urlopen(pagedUrl).read()
         response = json.loads(source)
@@ -79,16 +77,15 @@ def GetGeneNames(startRow=0,numRows=2000,totalRows=-1):
     return info
 
 def sub_name(s):
-   """replaces brackets with '_' and removes ',* """
+   """replaces brackets with '-' and removes ',* """
 
-        #replace brackets with '_' and remove ',*
-        #s = re.sub('\W', '',s_n)  dont do that, will replace '-' as well
-        s_n = re.sub('[()]',"_",s)
-        s_n = re.sub("'","",s_n)
-        s_n = re.sub('\*',"",s_n)
-        return s_n
+   #replace brackets with '_' and remove ',*
+   #s = re.sub('\W', '',s_n)  dont do that, will replace '-' as well
+   s_n = re.sub('[()]',"-",s)
+   s_n = re.sub("'","",s_n)
+   s_n = re.sub('\*',"",s_n)
+   return s_n
 
-#TODO:check no expression (-> ABI-mail)
 def download_all_ISH(info,folder_name="ABI-expression-data-9999"):
     """
     Downloads all datasets corresponding to SectionDataSetID given, converts data format from mhd/raw to nii and transforms data to dsurqec template.
@@ -110,8 +107,7 @@ def download_all_ISH(info,folder_name="ABI-expression-data-9999"):
         gene_ids = gene[1]
         gene_r = sub_name(gene_name)
         path_to_gene = os.path.join(data_path,gene_r)
-        #TODO: change logic, check if right file exists (empty folder)
-        if os.path.exists(path_to_gene):continue
+        #TODO: check if already downloaded,right file exists
         if not os.path.exists(path_to_gene) : os.mkdir(path_to_gene)
         for id in gene_ids:
             url = download_url + str(id)
@@ -131,7 +127,7 @@ def download_all_ISH(info,folder_name="ABI-expression-data-9999"):
             zf.extractall(os.path.join(path_to_gene,filename))
             zf.close()
 
-            #some datasets without energy.mhd file. Skip and delete folder
+            #some datasets without energy.mhd file (not available on API) Skip and delete folder
             if not os.path.isfile(os.path.join(path_to_folder,"energy.mhd")):
                     print("removing" + str(id)+gene_r)
                     shutil.rmtree(path_to_folder)
@@ -149,6 +145,22 @@ def download_all_ISH(info,folder_name="ABI-expression-data-9999"):
         print("failed: ")
         for item in failed_downloads:
             print(str(item))
+
+def struc_unionize(id):
+   """Queries the ABI API for an expression summary for structure-id = 997 (the entire brain) and returns
+   expression density, expression energy.
+   """
+   url = "http://api.brain-map.org/api/v2/data/SectionDataSet/{}.json?include=structure_unionizes[structure_id$eq997]".format(str(id))
+   source = urllib.request.urlopen(url).read()
+   response = json.loads(source)
+   i = 0
+   density = 0
+   energy = 0
+   for x in response['msg']:
+      density = x['structure_unionizes'][0]['expression_density']
+      energy = x['structure_unionizes'][0]['expression_energy']
+
+   return density, energy
 
 def convert_raw_to_nii(input_file,output_file):
     """
@@ -211,7 +223,7 @@ def apply_composite(file):
     at.inputs.input_image = file
     at.inputs.reference_image = '/usr/share/mouse-brain-atlases/dsurqec_200micron_masked.nii'
     name = str.split(os.path.basename(file),'.nii')[0] + '_2dsurqec.nii.gz'
-    at.inputs.interpolation = 'NearestNeighbor' #TODO: Sure??
+    at.inputs.interpolation = 'NearestNeighbor' #TODO: Sure?? Yes, avoiding values between -1 and 0 (ckeck)
     at.inputs.output_image = os.path.join(os.path.dirname(file),name)
     at.inputs.transforms = '/usr/share/mouse-brain-atlases/abi2dsurqec_Composite.h5'
     at.run()
@@ -220,10 +232,21 @@ def apply_composite(file):
 
 #TODO: possibly info where no dataset is available
 
+def save_dens_energy(info):
+   """saves the informatin obtained from the Allen Mouse Brain structure unionize module"""
+   file_path = os.path.join(folder_name,"density_energy.csv")
+   f = open(file_path,"w+")
+   f.write("acronym","id","density","energy")
+   for gene in info:
+      for id in info[gene]:
+         d,e = struc_unionize(id)
+         f.write('\n')
+         f.write(gene + "," + str(id) + "," + str(d) + "," + str(e))
+
 def save_info(info,folder_name):
    """saves the information about genename and correspoding SectionDataSetID as csv """
    file_path=os.path.join(folder_name,"ABI-genes-datasetid.csv")
-   f = open(file_path,"w")
+   f = open(file_path,"w+")
    for gene in info:
         f.write('\n')
         f.write(gene)
@@ -239,7 +262,6 @@ def create_archive(folder_name):
             print(file)
             tar_handle.add(os.path.join(root,file))
 
-
 def main():
    parser = argparse.ArgumentParser(description="ABI-expression",formatter_class=argparse.ArgumentDefaultsHelpFormatter)
    parser.add_argument('--package_name','-n',type=str,default="ABI-expression-data")
@@ -251,6 +273,7 @@ def main():
 
    folder_name = args.package_name + "-" + args.package_version
    info=GetGeneNames(startRow=args.startRow,numRows=args.numRows,totalRows=args.totalRows)
+   save_dens_energy(info,folder_name)
    download_all_ISH(info,folder_name=folder_name)
    save_info(info,folder_name)
    create_archive(folder_name)
