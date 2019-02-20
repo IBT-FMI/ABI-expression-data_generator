@@ -28,7 +28,7 @@ def GetGeneNames(startRow=0,numRows=2000,totalRows=-1):
     """
     Queries the Allen Mouse Brain Institute website for all gene expression data available for download.
 
-    Parameters:
+    Parameters
     -----------
     startRow: int
       Starting row
@@ -37,7 +37,7 @@ def GetGeneNames(startRow=0,numRows=2000,totalRows=-1):
     totalRows: int
       Number of total rows to query. If set to -1, all available rows will be displayed.
 
-    Returns:
+    Returns
     --------
     info: defaultdict
         key: genename, value: list of corresponding SectionDataSetID
@@ -90,7 +90,7 @@ def download_all_ISH(info,folder_name="ABI-expression-data-9999"):
     """
     Downloads all datasets corresponding to SectionDataSetID given, converts data format from mhd/raw to nii and transforms data to dsurqec template.
 
-    Parameters:
+    Parameters
    -----------
     info: defaultdict
         key: genename, value: list of corresponding SectionDataSetID (SectionDataSet: see "http://help.brain-map.org/display/api/Data+Model")
@@ -149,6 +149,13 @@ def download_all_ISH(info,folder_name="ABI-expression-data-9999"):
 def struc_unionize(id):
    """Queries the ABI API for an expression summary for structure-id = 997 (the entire brain) and returns
    expression density, expression energy.
+
+   Parameters
+   ----------
+
+   id: int
+      Unique identifier for ABI SectionDataSetID
+
    """
    url = "http://api.brain-map.org/api/v2/data/SectionDataSet/{}.json?include=structure_unionizes[structure_id$eq997]".format(str(id))
    source = urllib.request.urlopen(url).read()
@@ -166,14 +173,14 @@ def convert_raw_to_nii(input_file,output_file):
     """
     Converts mhd/raw format to NIfTI and orients data matrix in RAS-space.
 
-    Parameters:
+    Parameters
     -----------
         input_file : str
             path to .mhd file
         output_file : str
             filename prefix
 
-    Returns:
+    Returns
     ---------
         output_path : str
             path to generated NIfTI - file
