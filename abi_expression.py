@@ -156,6 +156,15 @@ def struc_unionize(id):
    id: int
       Unique identifier for ABI SectionDataSetID
 
+   Returns
+   -------
+
+   density: float
+      Expression density (fraction of voxels with signal detected).
+   energy: float
+      Expression energy, expression density modulated by signal intensity.
+
+
    """
    url = "http://api.brain-map.org/api/v2/data/SectionDataSet/{}.json?include=structure_unionizes[structure_id$eq997]".format(str(id))
    source = urllib.request.urlopen(url).read()
@@ -175,15 +184,16 @@ def convert_raw_to_nii(input_file,output_file):
 
     Parameters
     -----------
-        input_file : str
-            path to .mhd file
-        output_file : str
-            filename prefix
+    input_file : str
+      path to .mhd file
+    output_file : str
+      filename prefix
 
     Returns
     ---------
-        output_path : str
-            path to generated NIfTI - file
+    output_path : str
+      path to generated NIfTI - file
+
     """
     path = os.path.abspath('.')
     image_array, meta_header = load_raw_data_with_mhd(input_file)
@@ -216,7 +226,7 @@ def convert_raw_to_nii(input_file,output_file):
 
 def apply_composite(file):
     """
-    Uses ANTS ApplyTransforms to transform image to
+    Uses ANTS ApplyTransforms to transform image to target space.
 
     Parameters :
     ------------
