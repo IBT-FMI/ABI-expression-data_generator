@@ -1,9 +1,16 @@
 
-# ABI expression data
+# ABI Expression Data
 
 Script to download expression data from the Allen Mouse Brain data portal [ABI](http://mouse.brain-map.org/). Script will query the database, download available data, convert from raw/mhd format to NIfTI
 and registers data.
 
+
+# ABI Expression Data Package Releases
+
+Current recommended release in bold typeface:
+
+* **[ABI-expression-data-0.1.1.tar.xz](http://chymera.eu/distfiles/ABI-expression-data-0.1.1.tar.xz)** \[[checksum](http://chymera.eu/distfiles/ABI-expression-data-0.1.1.tar.xz)\]
+* [ABI-expression-data-0.1.tar.xz](http://chymera.eu/distfiles/ABI-expression-data-0.1.tar.xz) \[[checksum](http://chymera.eu/distfiles/ABI-expression-data-0.1.tar.xz)\]
 
 # Citation Notice
 
