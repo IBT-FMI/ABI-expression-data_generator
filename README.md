@@ -1,7 +1,7 @@
 
 # ABI Expression Data
 
-Script to download expression data from the Allen Mouse Brain data portal [ABI](http://mouse.brain-map.org/). Script will query the database, download available data, convert from raw/mhd format to NIfTI
+Script to download expression data from the Allen Mouse Brain data portal [ABI](http://mouse.brain-map.org/). This script will query the database, download available data, convert it from the raw/mhd format to NIfTI, and register it to a standard space (DSURQEC, as seen in the relevant [mouse brain preprocessing article](https://www.biorxiv.org/content/10.1101/619650v2)).
 and registers data.
 
 
