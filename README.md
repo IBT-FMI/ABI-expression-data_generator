@@ -26,7 +26,7 @@ Source: https://sites.google.com/site/pjmedphys/scripts
 In order to create a new version of the ABI-expression data package, simply navigate to the root directory of this repository and run:
 
 ```
-python -v 0.5 abi_expression.py
+python abi_expression.py -v 0.5
 ```
 
 This will create archives with the newest files fetched from upstream and processed according to the instructions standardized in this package.
