@@ -109,13 +109,13 @@ def download_all_ISH(info,folder_name="ABI-expression-data-9999"):
         path_to_gene = os.path.join(data_path,gene_r)
         #TODO: check if already downloaded,right file exists
         if not os.path.exists(path_to_gene) : os.mkdir(path_to_gene)
-        for id in gene_ids:
-            url = download_url + str(id)
+        for gene_id in gene_ids:
+            url = download_url + str(gene_id)
             try:
                 fh = urllib.request.urlretrieve(url)
             except timeout:
-                print("timeout with " + str(id)+ gene_r)
-                failed_downloads.append(id)
+                print("timeout with " + str(gene_id)+ gene_r)
+                failed_downloads.append(gene_id)
                 shutil.rmtree(path_to_gene)
                 continue
 
@@ -129,7 +129,7 @@ def download_all_ISH(info,folder_name="ABI-expression-data-9999"):
 
             #some datasets without energy.mhd file (not available on API) Skip and delete folder
             if not os.path.isfile(os.path.join(path_to_folder,"energy.mhd")):
-                    print("removing" + str(id)+gene_r)
+                    print("removing" + str(gene_id)+gene_r)
                     shutil.rmtree(path_to_folder)
                     continue
 
@@ -146,7 +146,7 @@ def download_all_ISH(info,folder_name="ABI-expression-data-9999"):
         for item in failed_downloads:
             print(str(item))
 
-def struc_unionize(id):
+def struc_unionize(my_id):
    """Queries the ABI API for an expression summary for structure-id = 997 (the entire brain) and returns
    expression density, expression energy.
 
@@ -166,7 +166,7 @@ def struc_unionize(id):
 
 
    """
-   url = "http://api.brain-map.org/api/v2/data/SectionDataSet/{}.json?include=structure_unionizes[structure_id$eq997]".format(str(id))
+   url = "http://api.brain-map.org/api/v2/data/SectionDataSet/{}.json?include=structure_unionizes[structure_id$eq997]".format(str(my_id))
    source = urllib.request.urlopen(url).read()
    response = json.loads(source)
    i = 0
@@ -249,16 +249,17 @@ def apply_composite(file):
 
 #TODO: possibly info where no dataset is available
 
-def save_dens_energy(info):
+def save_dens_energy(info, folder_name):
    """saves the informatin obtained from the Allen Mouse Brain structure unionize module"""
+   if not os.path.isdir(folder_name):os.mkdir(folder_name)
    file_path = os.path.join(folder_name,"density_energy.csv")
    f = open(file_path,"w+")
-   f.write("acronym","id","density","energy")
+   f.write("acronym,id,density,energy")
    for gene in info:
-      for id in info[gene]:
-         d,e = struc_unionize(id)
+      for gene_id in info[gene]:
+         d,e = struc_unionize(gene_id)
          f.write('\n')
-         f.write(gene + "," + str(id) + "," + str(d) + "," + str(e))
+         f.write(gene + "," + str(gene_id) + "," + str(d) + "," + str(e))
 
 def save_info(info,folder_name):
    """saves the information about genename and correspoding SectionDataSetID as csv """
@@ -267,8 +268,8 @@ def save_info(info,folder_name):
    for gene in info:
         f.write('\n')
         f.write(gene)
-        for id in info[gene]:
-            f.write("," + str(id))
+        for gene_id in info[gene]:
+            f.write("," + str(gene_id))
 
 def create_archive(folder_name):
    """creates .tar.xz archive """
