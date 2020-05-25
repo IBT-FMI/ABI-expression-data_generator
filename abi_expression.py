@@ -127,9 +127,10 @@ def download_all_ISH(info,folder_name="ABI-expression-data-9999"):
 			zf.extractall(os.path.join(path_to_gene,filename))
 			zf.close()
 
-			#some datasets without energy.mhd file (not available on API) Skip and delete folder
+			# Some datasets lack an energy.mhd file (not available on API).
+			# Skip and delete these directories.
 			if not os.path.isfile(os.path.join(path_to_folder,"energy.mhd")):
-					print("removing" + str(gene_id)+gene_r)
+					print('removing {}'.format(str(gene_id)+gene_r))
 					shutil.rmtree(path_to_folder)
 					continue
 
