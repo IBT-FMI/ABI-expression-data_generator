@@ -8,7 +8,7 @@ Script to download expression data from the Allen Mouse Brain data portal [ABI](
 
 Current recommended release in bold typeface:
 
-* **[ABI-expression-data-0.1.1.tar.xz](http://chymera.eu/distfiles/ABI-expression-data-0.1.1.tar.xz)** \[[checksum](http://chymera.eu/distfiles/ABI-expression-data-0.1.1.sha512)\]
+* **[ABI-expression-data-0.1.1.tar.xz](http://chymera.eu/distfiles/ABI-expression-data-0.1.1.tar.xz)** \[[SHA512 checksum](http://chymera.eu/distfiles/ABI-expression-data-0.1.1.sha512)\]
 
 # Citation Notice
 
