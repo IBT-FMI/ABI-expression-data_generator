@@ -8,15 +8,15 @@ This script will query the database, download available data, convert it from th
 
 Current recommended release in bold typeface:
 
-* **[ABI-expression-data-0.1.1.tar.xz](http://chymera.eu/distfiles/ABI-expression-data-0.1.1.tar.xz)** \[[SHA512 checksum](http://chymera.eu/distfiles/ABI-expression-data-0.1.1.sha512)\]
+* **[ABI-expression-data-0.1.1.tar.xz](http://resources.chymera.eu/distfiles/ABI-expression-data-0.1.1.tar.xz)** \[[SHA512 checksum](http://resources.chymera.eu/distfiles/ABI-expression-data-0.1.1.sha512)\]
 
 # Citation Notice
 
 Citation guidelines for use of the Allen mouse brain atlas can be found at: https://alleninstitute.org/legal/citation-policy/
 
-Script `mhd_utils_3d.py`:  
-Author: bjian,Price Jackson  
-Source: https://sites.google.com/site/pjmedphys/scripts   
+Script `mhd_utils_3d.py`
+Author: bjian,Price Jackson
+Source: https://sites.google.com/site/pjmedphys/scripts
 (slightly adapted for compatibility with newer Python versions)
 
 
