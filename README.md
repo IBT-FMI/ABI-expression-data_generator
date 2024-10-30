@@ -8,7 +8,7 @@ This script will query the database, download available data, convert it from th
 
 Current recommended release in bold typeface:
 
-* **[ABI-expression-data-0.1.1.tar.xz](http://resources.chymera.eu/distfiles/ABI-expression-data-0.1.1.tar.xz)** \[[SHA512 checksum](http://resources.chymera.eu/distfiles/ABI-expression-data-0.1.1.sha512)\]
+* **[ABI-expression-data-0.2.tar.xz](http://resources.chymera.eu/distfiles/ABI-expression-data-0.2.tar.xz)** \[[SHA512 checksum](http://resources.chymera.eu/distfiles/ABI-expression-data-0.2.sha512)\]
 
 # Citation Notice
 
